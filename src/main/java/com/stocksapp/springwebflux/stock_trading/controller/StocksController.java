@@ -1,28 +1,47 @@
 package com.stocksapp.springwebflux.stock_trading.controller;
 
+import com.stocksapp.springwebflux.stock_trading.dto.StockRequest;
+import com.stocksapp.springwebflux.stock_trading.dto.StockResponse;
 import com.stocksapp.springwebflux.stock_trading.model.Stock;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.stocksapp.springwebflux.stock_trading.repository.StocksRepository;
+import com.stocksapp.springwebflux.stock_trading.service.StocksService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/stocks")
 public class StocksController {
 
+    @Autowired
+    private StocksService stocksService;
+
     @GetMapping("/{id}")
-    public Mono<Stock> getOneStock(@PathVariable String id){
-        return Mono.just(Stock.builder().name("stock" + id).build());
+    public Mono<StockResponse> getOneStock(@PathVariable String id){
+        return stocksService.getOneStock(id);
     }
 
+//    @GetMapping("/{name}")
+//    public Mono<Stock> getStockByName(@PathVariable String name){
+//        return stocksService.getStockByName
+//    }
+
     @GetMapping
-    public Flux<Stock> getAllStocks(){
-        return Flux.range(1, 5)
-                .map(count -> Stock.builder()
-                    .name("stock-" + count)
-                    .build());
+    public Flux<StockResponse> getAllStocks(
+            @RequestParam(required = false, defaultValue = "0")
+            BigDecimal priceGreaterThan
+    ){
+        return stocksService.getAllStocks(priceGreaterThan);
+    }
+
+    @PostMapping
+    public Mono<StockResponse> createStock(@RequestBody StockRequest stockRequest){
+
+        return stocksService.createStock(stockRequest);
     }
 }
 
